@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -57,7 +57,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of yours",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of yours",
           "content": {
             "text/plain": {
               "schema": {
@@ -70,7 +70,7 @@
         },
         "responses": {
           "201": {
-            "description": "## Warning\nResponse data have been encrypted.\n\nThe response body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedRoute.P.ost](https://github.com/samchon/@nestia/core#encryptedroute) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of newly joined seller",
+            "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of newly joined seller",
             "content": {
               "text/plain": {
                 "schema": {
@@ -129,7 +129,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nEmail and password",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nEmail and password",
           "content": {
             "text/plain": {
               "schema": {
@@ -142,7 +142,7 @@
         },
         "responses": {
           "201": {
-            "description": "## Warning\nResponse data have been encrypted.\n\nThe response body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedRoute.P.ost](https://github.com/samchon/@nestia/core#encryptedroute) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of the seller",
+            "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of the seller",
             "content": {
               "text/plain": {
                 "schema": {
@@ -201,7 +201,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nOld and new passwords",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nOld and new passwords",
           "content": {
             "text/plain": {
               "schema": {
@@ -276,13 +276,13 @@
         "type": "object",
         "properties": {
           "cpu": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.CpuUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.CpuUsage"
           },
           "memory": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.MemoryUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.MemoryUsage"
           },
           "resource": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.ResourceUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.ResourceUsage"
           }
         },
         "nullable": false,
@@ -304,7 +304,7 @@
           }
         ]
       },
-      "_singlequote_process_singlequote_.global.NodeJS.CpuUsage": {
+      "process.global.NodeJS.CpuUsage": {
         "type": "object",
         "properties": {
           "user": {
@@ -325,7 +325,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.MemoryUsage": {
+      "process.global.NodeJS.MemoryUsage": {
         "type": "object",
         "properties": {
           "rss": {
@@ -364,7 +364,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.ResourceUsage": {
+      "process.global.NodeJS.ResourceUsage": {
         "type": "object",
         "properties": {
           "fsRead": {

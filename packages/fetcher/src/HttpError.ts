@@ -29,6 +29,7 @@ export class HttpError extends Error {
             | "HEAD",
         public readonly path: string,
         public readonly status: number,
+        public readonly headers: Record<string, string | string[]>,
         message: string,
     ) {
         super(message);
@@ -53,11 +54,17 @@ export class HttpError extends Error {
      * @returns JSON object of the `HttpError`.
      */
     public toJSON<T>(): HttpError.IProps<T> {
-        if (this.body_ === NOT_YET) this.body_ = JSON.parse(this.message);
+        if (this.body_ === NOT_YET)
+            try {
+                this.body_ = JSON.parse(this.message);
+            } catch {
+                this.body_ = this.message;
+            }
         return {
             method: this.method,
             path: this.path,
             status: this.status,
+            headers: this.headers,
             message: this.body_,
         };
     }
@@ -70,6 +77,7 @@ export namespace HttpError {
         method: "GET" | "DELETE" | "POST" | "PUT" | "PATCH" | "HEAD";
         path: string;
         status: number;
+        headers: Record<string, string | string[]>;
         message: T;
     }
 }

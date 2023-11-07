@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -59,10 +59,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "boolean"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -91,10 +91,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "number"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -123,10 +123,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -155,11 +155,11 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string",
               "nullable": true
             },
+            "description": "",
             "required": true
           }
         ],
@@ -189,7 +189,6 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string",
               "enum": [
@@ -198,6 +197,7 @@
                 "C"
               ]
             },
+            "description": "",
             "required": true
           }
         ],
@@ -231,11 +231,24 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
+              "type": "string",
               "format": "uuid",
-              "type": "string"
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
+            "description": "",
             "required": true
           }
         ],
@@ -264,11 +277,24 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
+              "type": "string",
               "format": "date",
-              "type": "string"
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"date\">",
+                  "kind": "format",
+                  "value": "date",
+                  "validate": "/^(\\d{4})-(\\d{2})-(\\d{2})$/.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
+            "description": "",
             "required": true
           }
         ],
@@ -297,12 +323,25 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
-              "format": "uuid",
               "type": "string",
+              "format": "uuid",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ],
               "nullable": true
             },
+            "description": "",
             "required": true
           }
         ],
@@ -332,12 +371,25 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
-              "format": "date",
               "type": "string",
+              "format": "date",
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"date\">",
+                  "kind": "format",
+                  "value": "date",
+                  "validate": "/^(\\d{4})-(\\d{2})-(\\d{2})$/.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ],
               "nullable": true
             },
+            "description": "",
             "required": true
           }
         ],
@@ -367,13 +419,13 @@
         "type": "object",
         "properties": {
           "cpu": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.CpuUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.CpuUsage"
           },
           "memory": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.MemoryUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.MemoryUsage"
           },
           "resource": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.ResourceUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.ResourceUsage"
           }
         },
         "nullable": false,
@@ -395,7 +447,7 @@
           }
         ]
       },
-      "_singlequote_process_singlequote_.global.NodeJS.CpuUsage": {
+      "process.global.NodeJS.CpuUsage": {
         "type": "object",
         "properties": {
           "user": {
@@ -416,7 +468,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.MemoryUsage": {
+      "process.global.NodeJS.MemoryUsage": {
         "type": "object",
         "properties": {
           "rss": {
@@ -455,7 +507,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.ResourceUsage": {
+      "process.global.NodeJS.ResourceUsage": {
         "type": "object",
         "properties": {
           "fsRead": {

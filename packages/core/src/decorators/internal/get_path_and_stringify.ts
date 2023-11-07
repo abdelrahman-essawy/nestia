@@ -3,8 +3,11 @@ import { InternalServerErrorException } from "@nestjs/common";
 import typia, { IValidation, TypeGuardError } from "typia";
 
 import { IResponseBodyStringifier } from "../../options/IResponseBodyStringifier";
-import { TransformError } from "./TransformError";
+import { NoTransformConfigureError } from "./NoTransformConfigureError";
 
+/**
+ * @internal
+ */
 export const get_path_and_stringify =
     (method: string) =>
     (
@@ -21,10 +24,13 @@ export const get_path_and_stringify =
         return [path ?? undefined, take(method)(functor)];
     };
 
+/**
+ * @internal
+ */
 const take =
     (method: string) =>
     <T>(functor?: IResponseBodyStringifier<T> | null) => {
-        if (functor === undefined) throw TransformError(method);
+        if (functor === undefined) throw NoTransformConfigureError(method);
         else if (functor === null) return JSON.stringify;
         else if (functor.type === "stringify") return functor.stringify;
         else if (functor.type === "assert") return assert(functor.assert);
@@ -35,6 +41,9 @@ const take =
         );
     };
 
+/**
+ * @internal
+ */
 const assert =
     <T>(closure: (data: T) => string) =>
     (data: T) => {
@@ -53,6 +62,9 @@ const assert =
         }
     };
 
+/**
+ * @internal
+ */
 const is =
     <T>(closure: (data: T) => string | null) =>
     (data: T) => {
@@ -61,6 +73,9 @@ const is =
         return result;
     };
 
+/**
+ * @internal
+ */
 const validate =
     <T>(closure: (data: T) => IValidation<string>) =>
     (data: T) => {
@@ -73,4 +88,7 @@ const validate =
         return result.data;
     };
 
+/**
+ * @internal
+ */
 const MESSAGE = "Response body data is not following the promised type.";

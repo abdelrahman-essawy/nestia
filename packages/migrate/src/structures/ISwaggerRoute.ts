@@ -1,4 +1,4 @@
-import { IJsDocTagInfo } from "typia/lib/metadata/IJsDocTagInfo";
+import { IJsDocTagInfo } from "typia/lib/schemas/metadata/IJsDocTagInfo";
 
 import { ISwaggerSchema } from "./ISwaggeSchema";
 
@@ -40,6 +40,12 @@ export namespace ISwaggerRoute {
             schema: ISwaggerSchema;
         };
         "application/json"?: {
+            schema: ISwaggerSchema;
+        };
+        "application/x-www-form-urlencoded"?: {
+            schema: ISwaggerSchema;
+        };
+        "*/*"?: {
             schema: ISwaggerSchema;
         };
     }

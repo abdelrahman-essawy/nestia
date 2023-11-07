@@ -6,6 +6,7 @@ import { PlainBodyProgrammer } from "../programmers/PlainBodyProgrammer";
 import { TypedBodyProgrammer } from "../programmers/TypedBodyProgrammer";
 import { TypedHeadersProgrammer } from "../programmers/TypedHeadersProgrammer";
 import { TypedParamProgrammer } from "../programmers/TypedParamProgrammer";
+import { TypedQueryBodyProgrammer } from "../programmers/TypedQueryBodyProgrammer";
 import { TypedQueryProgrammer } from "../programmers/TypedQueryProgrammer";
 
 export namespace ParameterDecoratorTransformer {
@@ -39,7 +40,9 @@ export namespace ParameterDecoratorTransformer {
             // FIND PROGRAMMER
             const programmer: Programmer | undefined =
                 FUNCTORS[
-                    project.checker.getTypeAtLocation(declaration).symbol.name
+                    getName(
+                        project.checker.getTypeAtLocation(declaration).symbol,
+                    )
                 ];
             if (programmer === undefined) return decorator;
 
@@ -83,13 +86,19 @@ const FUNCTORS: Record<string, Programmer> = {
         parameters.length
             ? parameters
             : [TypedHeadersProgrammer.generate(project)(modulo)(type)],
-    TypedParam: (project) => () => TypedParamProgrammer.generate(project),
+    TypedParam: (project) => TypedParamProgrammer.generate(project),
     TypedQuery: (project) => (modulo) => (parameters) => (type) =>
         parameters.length
             ? parameters
             : [TypedQueryProgrammer.generate(project)(modulo)(type)],
-    PlainBody: (project) => (modulo) => () => (type) =>
-        PlainBodyProgrammer.generate(project)(modulo)(type),
+    "TypedQuery.Body": (project) => (modulo) => (parameters) => (type) =>
+        parameters.length
+            ? parameters
+            : [TypedQueryBodyProgrammer.generate(project)(modulo)(type)],
+    PlainBody: (project) => (modulo) => (parameters) => (type) =>
+        parameters.length
+            ? parameters
+            : [PlainBodyProgrammer.generate(project)(modulo)(type)],
 };
 
 const LIB_PATH = path.join(
@@ -100,3 +109,18 @@ const LIB_PATH = path.join(
     "decorators",
 );
 const SRC_PATH = path.resolve(path.join(__dirname, "..", "decorators"));
+
+const getName = (symbol: ts.Symbol): string => {
+    const parent = symbol.getDeclarations()?.[0]?.parent;
+    return parent
+        ? exploreName(parent)(symbol.escapedName.toString())
+        : "__type";
+};
+const exploreName =
+    (decl: ts.Node) =>
+    (name: string): string =>
+        ts.isModuleBlock(decl)
+            ? exploreName(decl.parent.parent)(
+                  `${decl.parent.name.getFullText().trim()}.${name}`,
+              )
+            : name;

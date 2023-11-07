@@ -1,157 +1,64 @@
-import cli from "cli";
-import path from "path";
-import { WorkerConnector } from "tgrid/protocols/workers/WorkerConnector";
-import { parseNative } from "tsconfck";
 import ts from "typescript";
 
 import { INestiaConfig } from "../../INestiaConfig";
 import { NestiaSdkApplication } from "../../NestiaSdkApplication";
-import { NestiaSdkConfig } from "./NestiaSdkConfig";
-
-interface ICommand {
-    exclude: string | null;
-    out: string | null;
-    e2e: string | null;
-}
-
-interface IProps {
-    assign: (config: INestiaConfig, output: string) => void;
-    validate: (config: INestiaConfig) => boolean;
-    location: (config: INestiaConfig) => string;
-}
+import { NestiaConfigLoader } from "./NestiaConfigLoader";
 
 export namespace NestiaSdkCommand {
-    export const sdk = (argv: string[]) =>
-        main({
-            assign: (config, output) => (config.output = output),
-            validate: (config) => !!config.output,
-            location: (config) => config.output!,
-        })(argv)((app) => app.sdk());
+    export const sdk = () => main((app) => app.sdk());
+    export const swagger = () => main((app) => app.swagger());
+    export const e2e = () => main((app) => app.e2e());
 
-    export const swagger = (argv: string[]) =>
-        main({
-            assign: (config, output) => {
-                if (!config.swagger) config.swagger = { output };
-                else config.swagger.output = output;
-            },
-            validate: (config) => !!config.swagger && !!config.swagger.output,
-            location: (config) => config.swagger!.output!,
-        })(argv)((app) => app.swagger());
+    const main = async (task: (app: NestiaSdkApplication) => Promise<void>) => {
+        await generate(task);
+    };
 
-    export const e2e = (argv: string[]) =>
-        main({
-            assign: (config, output) => (config.output = output),
-            validate: (config) => !!config.output,
-            location: (config) => config.output!,
-        })(argv)((app) => app.e2e());
-
-    const main =
-        (props: IProps) =>
-        (argv: string[]) =>
-        async (task: (app: NestiaSdkApplication) => Promise<void>) => {
-            const command: ICommand = cli.parse({
-                exclude: ["e", "Something to exclude", "string", null],
-                out: ["o", "Output path of the SDK files", "string", null],
-                e2e: [
-                    "e",
-                    "Output path of e2e test function files",
-                    "string",
-                    null,
-                ],
-            });
-
-            const inputs: string[] = [];
-            for (const r of argv) {
-                if (r[0] === "-") break;
-                inputs.push(r);
-            }
-            await generate(props)(command)(inputs)(task);
-        };
-
-    const generate =
-        (props: IProps) =>
-        (command: ICommand) =>
-        (include: string[]) =>
-        async (task: (app: NestiaSdkApplication) => Promise<void>) => {
-            // CONFIGURATION
-            const config: INestiaConfig =
-                (await get_nestia_config(props.validate)) ??
-                parse_cli(props)(command)(include);
-
-            const options: ts.CompilerOptions | null =
-                await get_typescript_options();
-            config.compilerOptions = {
-                ...(options ?? {}),
-                ...(config.compilerOptions ?? {}),
-            };
-
-            // CALL THE APP.GENERATE()
-            const app: NestiaSdkApplication = new NestiaSdkApplication(config);
-            await task(app);
-        };
-
-    async function get_typescript_options(): Promise<ts.CompilerOptions | null> {
-        const configFileName = ts.findConfigFile(
-            process.cwd(),
-            ts.sys.fileExists,
-            "tsconfig.json",
-        );
-        if (!configFileName) return null;
-
-        const { tsconfig } = await parseNative(configFileName);
-        const configFileText = JSON.stringify(tsconfig);
-        const { config } = ts.parseConfigFileTextToJson(
-            configFileName,
-            configFileText,
-        );
-        const configParseResult = ts.parseJsonConfigFileContent(
-            config,
-            ts.sys,
-            path.dirname(configFileName),
-        );
-
-        const { moduleResolution, ...result } =
-            configParseResult.raw.compilerOptions;
-        return result;
-    }
-
-    async function get_nestia_config(
-        validate: (config: INestiaConfig) => boolean,
-    ): Promise<INestiaConfig | null> {
-        const connector = new WorkerConnector(null, null, "process");
-        await connector.connect(
-            `${__dirname}/nestia.config.getter.${__filename.substr(-2)}`,
-        );
-
-        const driver = await connector.getDriver<typeof NestiaSdkConfig>();
-        const config: INestiaConfig | null = await driver.get();
-        await connector.close();
-
-        if (config !== null && validate(config) === false)
-            throw new Error(
-                `Error on NestiaCommand.main(): output path is not specified in the "nestia.config.ts".`,
+    const generate = async (
+        task: (app: NestiaSdkApplication) => Promise<void>,
+    ) => {
+        // LOAD CONFIG INFO
+        const compilerOptions: ts.CompilerOptions =
+            await NestiaConfigLoader.compilerOptions(
+                getFileArgument({
+                    type: "project",
+                    extension: "json",
+                }) ?? "tsconfig.json",
             );
+        const config: INestiaConfig = await NestiaConfigLoader.config(
+            getFileArgument({
+                type: "config",
+                extension: "ts",
+            }) ?? "nestia.config.ts",
+            compilerOptions,
+        );
 
-        return config;
-    }
+        // GENERATE
+        const app: NestiaSdkApplication = new NestiaSdkApplication(
+            config,
+            compilerOptions,
+        );
+        await task(app);
+    };
 
-    const parse_cli =
-        (props: IProps) =>
-        (command: ICommand) =>
-        (include: string[]): INestiaConfig => {
-            if (command.out === null)
-                throw new Error(
-                    `Error on NestiaCommand.main(): output directory is not specified. Add the "--out <output_directory>" option.`,
-                );
+    const getFileArgument = (props: {
+        type: string;
+        extension: string;
+    }): string | null => {
+        const argv: string[] = process.argv.slice(3);
+        if (argv.length === 0) return null;
 
-            const config: INestiaConfig = {
-                input: {
-                    include,
-                    exclude: command.exclude ? [command.exclude] : undefined,
-                },
-                e2e: command.e2e ?? undefined,
-            };
-            props.assign(config, command.out);
-            return config;
-        };
+        const index: number = argv.findIndex(
+            (str) => str === `--${props.type}`,
+        );
+        if (index === -1) return null;
+        else if (argv.length === 1)
+            throw new Error(`${props.type} file must be provided`);
+
+        const file: string = argv[index + 1];
+        if (file.endsWith(props.extension) === false)
+            throw new Error(
+                `${props.type} file must be ${props.extension} file`,
+            );
+        return file;
+    };
 }

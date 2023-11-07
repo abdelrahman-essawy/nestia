@@ -1,25 +1,36 @@
 import { Callout, Tabs, Tab } from 'nextra-theme-docs'
 
-# Mockup Simulator
 ## Outline
 <Tabs items={['Configuration', 'Build Script', 'Generated SDK Library']}>
     <Tab>
-```typescript copy filename="nestia.config.ts" showLineNumbers {4}
+```typescript copy filename="nestia.config.ts" showLineNumbers {7}
 import { INestiaConfig } from "@nestia/sdk";
+import { NestFactory } from "@nestjs/core";
 
-const config: INestiaConfig = {
+import { YourModule } from "./src/YourModule";
+
+const NESTIA_CONFIG: INestiaConfig = {
     simulate: true, // supports simulation mode
-    input: "src/controllers",
+    input: async () => {
+        const app = await NestFactory.create(YourModule);
+        // app.setGlobalPrefix("api");
+        // app.enableVersioning({
+        //     type: VersioningType.URI,
+        //     prefix: "v", 
+        // })
+        return app;
+    },
     output: "src/api",
     e2e: "test",
     distribute: "packages/api",
 };
-export default config;
+export default NESTIA_CONFIG;
 ```
     </Tab>
     <Tab>
-```bash filename="Terminal" copy showLineNumbers {}
+```bash filename="Terminal" showLineNumbers {}
 npx nestia sdk
+npx nestia sdk --config nestia.config.ts --project tsconfig.json
 ```
     </Tab>
     <Tab>
@@ -39,7 +50,7 @@ npx nestia sdk
 export async function update(
     connection: IConnection,
     section: string,
-    id: string,
+    id: string & Format<"uuid">,
     input: update.Input,
 ): Promise<update.Output> {
     return !!connection.simulate
@@ -49,11 +60,18 @@ export async function update(
               id,
               input,
           )
-        : Fetcher.fetch(
-              connection,
-              update.ENCRYPTED,
-              update.METHOD,
-              update.path(section, id),
+        : PlainFetcher.fetch(
+              {
+                  ...connection,
+                  headers: {
+                      ...(connection.headers ?? {}),
+                      "Content-Type": "application/json",
+                  },
+              },
+              {
+                  ...update.METADATA,
+                  path: update.path(section, id),
+              } as const,
               input,
           );
 }
@@ -61,14 +79,21 @@ export namespace update {
     export type Input = Primitive<IBbsArticle.IStore>;
     export type Output = Primitive<IBbsArticle>;
 
-    export const METHOD = "PUT" as const;
-    export const PATH: string = "/bbs/:section/articles/:id";
-    export const ENCRYPTED: Fetcher.IEncrypted = {
-        request: false,
-        response: false,
-    };
+    export const METADATA = {
+        method: "PUT",
+        path: "/bbs/articles/:section/:id",
+        request: {
+            type: "application/json",
+            encrypted: false
+        },
+        response: {
+            type: "application/json",
+            encrypted: false,
+        },
+        status: null,
+    } as const;
 
-    export const path = (section: string, id: string): string => {
+    export const path = (section: string, id: string & Format<"uuid">): string => {
         return `/bbs/${encodeURIComponent(section ?? "null")}/articles/${encodeURIComponent(id ?? "null")}`;
     };
 
@@ -78,7 +103,7 @@ export namespace update {
     export const simulate = async (
         connection: IConnection,
         section: string,
-        id: string,
+        id: string & Format<"uuid">,
         input: update.Input,
     ): Promise<Output> => {
         const assert = NestiaSimulator.assert({
@@ -103,7 +128,7 @@ export namespace update {
 
 Nestia SDK library supports Mockup simulator.
 
-When generating [SDK library](sdk), if you configure `simulate` property of `nestia.config.file` to be `true`, newly generated SDK library will support mockup simulation mode for frontend developers. With the mockup simulator, frontend developers can simulate NestJS backend server with internal mock functions, instead of connecting to the real backend server.
+When generating [SDK library](./sdk), if you configure `simulate` property of `nestia.config.file` to be `true`, newly generated SDK library will support mockup simulation mode for frontend developers. With the mockup simulator, frontend developers can simulate NestJS backend server with internal mock functions, instead of connecting to the real backend server.
 
 Therefore, with the mockup simulator, frontend development can be started even when the backend server is not ready yet. Mockup simulator of Nestia SDK will replace the real backend server, validating request data and returning mockup data as response.
 
@@ -118,27 +143,37 @@ Within framework of backend developers, they also do not need to be suffered fro
     <code>INestiaConfig.ts</code>
 ]}>
     <Tab>
-```typescript copy filename="nestia.config.ts" showLineNumbers {4}
+```typescript copy filename="nestia.config.ts" showLineNumbers {7}
 import { INestiaConfig } from "@nestia/sdk";
+import { NestFactory } from "@nestjs/core";
 
-const config: INestiaConfig = {
+import { YourModule } from "./src/YourModule";
+
+const NESTIA_CONFIG: INestiaConfig = {
     simulate: true, // supports simulation mode
-    input: "src/controllers",
+    input: async () => {
+        const app = await NestFactory.create(YourModule);
+        // app.setGlobalPrefix("api");
+        // app.enableVersioning({
+        //     type: VersioningType.URI,
+        //     prefix: "v", 
+        // })
+        return app;
+    },
     output: "src/api",
     e2e: "test",
     distribute: "packages/api",
 };
-export default config;
+export default NESTIA_CONFIG;
 ```
     </Tab>
     <Tab>
-```typescript filename="INestiaConfig.ts" showLineNumbers {14-64}
-import type ts from "typescript";
+```typescript filename="INestiaConfig.ts" showLineNumbers {13-32, 55-68}
+import type { INestApplication } from "@nestjs/common";
 
 import type { ISwagger } from "./structures/ISwagger";
 import type { ISwaggerInfo } from "./structures/ISwaggerInfo";
 import type { ISwaggerSecurityScheme } from "./structures/ISwaggerSecurityScheme";
-import type { StripEnums } from "./utils/StripEnums";
 
 /**
  * Definition for the `nestia.config.ts` file.
@@ -147,9 +182,18 @@ import type { StripEnums } from "./utils/StripEnums";
  */
 export interface INestiaConfig {
     /**
-     * List of files or directories containing the NestJS controller classes.
+     * Accessor of controller classes.
+     *
+     * You can specify it within two ways
+     *
+     *   - Asynchronous function returning `INestApplication` instance
+     *   - Specify the path or directory of controller class files
      */
-    input: string | string[] | INestiaConfig.IInput;
+    input:
+        | (() => Promise<INestApplication>)
+        | INestiaConfig.IInput
+        | string[]
+        | string;
 
     /**
      * Output directory that SDK would be placed in.
@@ -157,6 +201,27 @@ export interface INestiaConfig {
      * If not configured, you can't build the SDK library.
      */
     output?: string;
+
+    /**
+     * Building `swagger.json` is also possible.
+     *
+     * If not specified, you can't build the `swagger.json`.
+     */
+    swagger?: INestiaConfig.ISwaggerConfig;
+
+    /**
+     * Target directory that SDK distribution files would be placed in.
+     *
+     * If you configure this property and runs `npx nestia sdk` command,
+     * distribution environments for the SDK library would be generated.
+     *
+     * After the SDK library generation, move to the `distribute` directory,
+     * and runs `npm publish` command, then you can share SDK library with
+     * other client (frontend) developers.
+     *
+     * Recommend to use `"packages/api"` value.
+     */
+    distribute?: string;
 
     /**
      * Allow simulation mode.
@@ -185,47 +250,43 @@ export interface INestiaConfig {
     e2e?: string;
 
     /**
-     * Target directory that SDK distribution files would be placed in.
+     * Whether to use propagation mode or not.
      *
-     * If you configure this property and runs `npx nestia sdk` command,
-     * distribution environments for the SDK library would be generated.
+     * If being configured, interaction functions of the SDK library would
+     * perform the propagation mode. The propagation mode means that never
+     * throwing exception even when status code is not 200 (or 201), but just
+     * returning the {@link IPropagation} typed instance, which can specify its body
+     * type through discriminated union determined by status code.
      *
-     * After the SDK library generation, move to the `distribute` directory,
-     * and runs `npm publish` command, then you can share SDK library with
-     * other client (frontend) developers.
-     *
-     * Recommend to use `"packages/api"` value.
+     * @default false
      */
-    distribute?: string;
+    propagate?: boolean;
 
     /**
-     * Building `swagger.json` is also possible.
+     * Whether to clone DTO structures or not.
      *
-     * If not specified, you can't build the `swagger.json`.
+     * If being configured, all of DTOs used in the backend server would be cloned
+     * into the `structures` directory, and the SDK library would be refer to the
+     * cloned DTOs instead of the original.
+     *
+     * @default false
      */
-    swagger?: INestiaConfig.ISwaggerConfig;
+    clone?: boolean;
 
     /**
-     * Compiler options for the TypeScript.
+     * Whether to wrap DTO by primitive type.
      *
-     * If you've omitted this property or the assigned property cannot fully cover the
-     * `tsconfig.json`, the properties from the `tsconfig.json` would be assigned to here.
-     * Otherwise, this property has been configured and it's detailed values are different
-     * with the `tsconfig.json`, this property values would be used instead.
+     * If you don't configure this property as `false`, all of DTOs in the
+     * SDK library would be automatically wrapped by {@link Primitive} type.
      *
-     * ```typescript
-     * import ts from "typescript";
+     * For refenrece, if a DTO type be capsuled by the {@link Primitive} type,
+     * all of methods in the DTO type would be automatically erased. Also, if
+     * the DTO has a `toJSON()` method, the DTO type would be automatically
+     * converted to return type of the `toJSON()` method.
      *
-     * const tsconfig: ts.TsConfig;
-     * const nestiaConfig: IConfiguration;
-     *
-     * const compilerOptions: ts.CompilerOptions = {
-     *     ...tsconfig.compilerOptions,
-     *     ...(nestiaConfig.compilerOptions ?? {})
-     * }
-     * ```
+     * @default true
      */
-    compilerOptions?: StripEnums<ts.CompilerOptions>;
+    primitive?: boolean;
 
     /**
      * Whether to assert parameter types or not.
@@ -255,21 +316,6 @@ export interface INestiaConfig {
      * @default false
      */
     json?: boolean;
-
-    /**
-     * Whether to wrap DTO by primitive type.
-     *
-     * If you don't configure this property as `false`, all of DTOs in the
-     * SDK library would be automatically wrapped by {@link Primitive} type.
-     *
-     * For refenrece, if a DTO type be capsuled by the {@link Primitive} type,
-     * all of methods in the DTO type would be automatically erased. Also, if
-     * the DTO has a `toJSON()` method, the DTO type would be automatically
-     * converted to return type of the `toJSON()` method.
-     *
-     * @default true
-     */
-    primitive?: boolean;
 }
 export namespace INestiaConfig {
     /**
@@ -306,7 +352,7 @@ export namespace INestiaConfig {
          *
          * If omitted, `package.json` content would be used instead.
          */
-        info?: Partial<ISwaggeInfo>;
+        info?: Partial<ISwaggerInfo>;
 
         /**
          * List of server addresses.
@@ -315,8 +361,29 @@ export namespace INestiaConfig {
 
         /**
          * Security schemes.
+         *
+         * When generating `swagger.json` file through `nestia`, if your controllers or
+         * theirs methods have a security key which is not enrolled in here property,
+         * it would be an error.
          */
         security?: Record<string, ISwaggerSecurityScheme>;
+
+        /**
+         * Decompose query DTO.
+         *
+         * If you configure this property to be `true`, the query DTO would be decomposed
+         * into individual query parameters per each property.
+         *
+         * @default false
+         */
+        decompose?: boolean;
+
+        operationId?(props: {
+            class: string;
+            function: string;
+            method: "HEAD" | "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            path: string;
+        }): string;
     }
 }
 ```
@@ -325,12 +392,12 @@ export namespace INestiaConfig {
 
 Make `nestia.config.ts` file and run `npx nestia sdk` command.
 
-At first, create `nestia.config.ts` file. It must be placed on the top level directory of your NestJS backend project. Of course, `tsconfig.json` file also must be placed in the top level directory, too. After creation, configure the `nestia.config.ts` file referencing above example code and type definition.
+At first, create `nestia.config.ts` file through `npx nestia init` command. It would be placed on the top level directory of your NestJS backend project. For reference, `tsconfig.json` file also must be placed in the top level directory, too. After creation, configure the `nestia.config.ts` file referencing above example code and type definition.
 
 At least, you've to configure those three properties. Also, if you've decided to support mockup simulator for frontend developers, I recommend you to configure two properties more, for [automatic e2e functions generation](e2e) and [SDK library distribution](sdk#distribution).
 
   - Essential
-    - `input`: Path of controller files
+    - `input`: Accessor of controller classes
     - `output`: Path of output directory for SDK library
     - `simulate`: Whether to support simulator or not
   - Recommended
@@ -339,14 +406,45 @@ At least, you've to configure those three properties. Also, if you've decided to
 
 When you've completed above configuration, just run `npx nestia sdk` command. Then, [SDK library](./sdk) would be generated into the `$config.output` directory, with simulation mode supporting. If you want to generate e2e functions automatically, run `npx nestia e2e` command after.
 
-By the way, if your controller files are separated into multiple directories, you can choose two options. First is listing up every directories, and second is using regex expression. Also, you can exclude some special directories or files using `exclude` option. Of course, you can mix all of these options like below:
+By the way, `nestia.config.ts` supports alternative options specifying the target controller classes instead of using the `Module` instance. If your backend application server does not have special configuration like `setGlobalPrefix`, `enableVersioning` and `RouterModule`, it is okay to specifying the target controller classes just by writing their file path like below.
 
-<Tabs items={['List up every directories', 'Use regex pattern', 'Exclude']} defaultIndex={2}>
+<Tabs items={[
+        'Module',
+        'Directory', 
+        'Pattern', 
+        'Exclude'
+    ]}
+    defaultIndex={1}>
+    <Tab>
+```typescript copy filename="nestia.config.ts" showLineNumbers {7-15}
+import { INestiaConfig } from "@nestia/sdk";
+import { NestFactory } from "@nestjs/core";
+
+import { YourModule } from "./src/YourModule";
+
+const NESTIA_CONFIG: INestiaConfig = {
+    input: async () => {
+        const app = await NestFactory.create(YourModule);
+        // app.setGlobalPrefix("api");
+        // app.enableVersioning({
+        //     type: VersioningType.URI,
+        //     prefix: "v", 
+        // })
+        return app;
+    },
+    output: "src/api",
+    simulate: true,
+    distribute: "packages/api",
+    e2e: "test",
+};
+export default NESTIA_CONFIG;
+```
+    </Tab>
     <Tab>
 ```typescript copy filename="nestia.config.ts" showLineNumbers {4-8}
 import { INestiaConfig } from "@nestia/sdk";
 
-const config: INestiaConfig = {
+const NESTIA_CONFIG: INestiaConfig = {
     input: [
         "src/controllers", 
         "src/fake/controllers", 
@@ -357,28 +455,28 @@ const config: INestiaConfig = {
     distribute: "packages/api",
     e2e: "test",
 };
-export default config;
+export default NESTIA_CONFIG;
 ```
     </Tab>
     <Tab>
 ```typescript copy filename="nestia.config.ts" showLineNumbers {4}
 import { INestiaConfig } from "@nestia/sdk";
 
-const config: INestiaConfig = {
+const NESTIA_CONFIG: INestiaConfig = {
     input: "src/**/*.controller.ts",
     output: "src/api",
     simulate: true,
     distribute: "packages/api",
     e2e: "test",
 };
-export default config;
+export default NESTIA_CONFIG;
 ```
     </Tab>
     <Tab>
 ```typescript copy filename="nestia.config.ts" showLineNumbers {4-7}
 import { INestiaConfig } from "@nestia/sdk";
 
-const config: INestiaConfig = {
+const NESTIA_CONFIG: INestiaConfig = {
     input: {
         include: ["src/controllers"],
         exclude: ["src/**/*.fake.ts"],
@@ -388,7 +486,7 @@ const config: INestiaConfig = {
     distribute: "packages/api",
     e2e: "test",
 };
-export default config;
+export default NESTIA_CONFIG;
 ```
     </Tab>
 </Tabs>
@@ -415,7 +513,7 @@ export default config;
 export async function update(
     connection: IConnection,
     section: string,
-    id: string,
+    id: string & Format<"uuid">,
     input: update.Input,
 ): Promise<update.Output> {
     return !!connection.simulate
@@ -425,11 +523,18 @@ export async function update(
               id,
               input,
           )
-        : Fetcher.fetch(
-              connection,
-              update.ENCRYPTED,
-              update.METHOD,
-              update.path(section, id),
+        : PlainFetcher.fetch(
+              {
+                  ...connection,
+                  headers: {
+                      ...(connection.headers ?? {}),
+                      "Content-Type": "application/json",
+                  },
+              },
+              {
+                  ...update.METADATA,
+                  path: update.path(section, id),
+              } as const,
               input,
           );
 }
@@ -437,14 +542,21 @@ export namespace update {
     export type Input = Primitive<IBbsArticle.IStore>;
     export type Output = Primitive<IBbsArticle>;
 
-    export const METHOD = "PUT" as const;
-    export const PATH: string = "/bbs/:section/articles/:id";
-    export const ENCRYPTED: Fetcher.IEncrypted = {
-        request: false,
-        response: false,
-    };
+    export const METADATA = {
+        method: "PUT",
+        path: "/bbs/articles/:section/:id",
+        request: {
+            type: "application/json",
+            encrypted: false
+        },
+        response: {
+            type: "application/json",
+            encrypted: false,
+        },
+        status: null,
+    } as const;
 
-    export const path = (section: string, id: string): string => {
+    export const path = (section: string, id: string & Format<"uuid">): string => {
         return `/bbs/${encodeURIComponent(section ?? "null")}/articles/${encodeURIComponent(id ?? "null")}`;
     };
     
@@ -454,7 +566,7 @@ export namespace update {
     export const simulate = async (
         connection: IConnection,
         section: string,
-        id: string,
+        id: string & Format<"uuid">,
         input: update.Input,
     ): Promise<Output> => {
         const assert = NestiaSimulator.assert({
@@ -462,8 +574,8 @@ export namespace update {
             host: connection.host,
             path: path(section, id)
         });
-        assert.param("section")("string")(() => typia.assert(section));
-        assert.param("id")("uuid")(() => typia.assert(id));
+        assert.param("section")(() => typia.assert(section));
+        assert.param("id")(() => typia.assert(id));
         assert.body(() => typia.assert(input));
         return random(
             typeof connection.simulate === 'object'
@@ -486,6 +598,7 @@ export namespace NestiaSimulator {
         host: string;
         path: string;
         method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+        contentType: string;
     }
 
     export const assert = (props: IProps) => {
@@ -498,17 +611,10 @@ export namespace NestiaSimulator {
     const param =
         (props: IProps) =>
         (name: string) =>
-        (type: string) =>
         <T>(task: () => T): void => {
             validate(
                 (exp) => `URL parameter "${name}" is not ${exp.expected} type.`,
-            )(props)(
-                type === "uuid"
-                    ? uuid(task)
-                    : type === "date"
-                    ? date(task)
-                    : task,
-            );
+            )(props)(task);
         };
 
     const query =
@@ -526,20 +632,6 @@ export namespace NestiaSimulator {
                 props,
             )(task);
 
-    const uuid =
-        <T>(task: () => T) =>
-        () => {
-            const value = task();
-            return typia.assert<IUuid>({ value }).value as T;
-        };
-
-    const date =
-        <T>(task: () => T) =>
-        () => {
-            const value = task();
-            return typia.assert<IDate>({ value }).value as T;
-        };
-
     const validate =
         (message: (exp: typia.TypeGuardError) => string, path?: string) =>
         (props: IProps) =>
@@ -552,6 +644,9 @@ export namespace NestiaSimulator {
                         props.method,
                         props.host + props.path,
                         400,
+                        {
+                            "Content-Type": props.contentType,
+                        },
                         JSON.stringify({
                             method: exp.method,
                             path: path ?? exp.path,
@@ -563,20 +658,6 @@ export namespace NestiaSimulator {
                 throw exp;
             }
         };
-}
-
-interface IUuid {
-    /**
-     * @format uuid
-     */
-    value: string | null;
-}
-
-interface IDate {
-    /**
-     * @format date
-     */
-    value: string | null;
 }
 ```
     </Tab>

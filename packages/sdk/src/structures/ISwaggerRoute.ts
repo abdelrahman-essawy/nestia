@@ -1,9 +1,10 @@
 import { IJsonSchema } from "typia";
-import { IJsDocTagInfo } from "typia/lib/metadata/IJsDocTagInfo";
+import { IJsDocTagInfo } from "typia/lib/schemas/metadata/IJsDocTagInfo";
 
 export interface ISwaggerRoute {
     deprecated?: boolean;
     security?: Record<string, string[]>[];
+    operationId?: string;
     tags: string[];
     parameters: ISwaggerRoute.IParameter[];
     requestBody?: ISwaggerRoute.IRequestBody;
@@ -23,7 +24,7 @@ export namespace ISwaggerRoute {
         description?: string;
     }
     export interface IRequestBody {
-        description: string;
+        description?: string;
         content: IContent;
         required: true;
         "x-nestia-encrypted": boolean;
@@ -37,6 +38,9 @@ export namespace ISwaggerRoute {
         }
     >;
     export interface IContent {
+        "application/x-www-form-urlencoded"?: {
+            schema: IJsonSchema;
+        };
         "application/json"?: {
             schema: IJsonSchema;
         };

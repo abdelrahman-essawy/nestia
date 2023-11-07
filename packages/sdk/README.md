@@ -3,7 +3,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/samchon/nestia/blob/master/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@nestia/core.svg)](https://www.npmjs.com/package/@nestia/core)
-[![Downloads](https://img.shields.io/npm/dm/nestia.svg)](https://www.npmjs.com/package/nestia)
+[![Downloads](https://img.shields.io/npm/dm/@nestia/core.svg)](https://www.npmjs.com/package/@nestia/core)
 [![Build Status](https://github.com/samchon/nestia/workflows/build/badge.svg)](https://github.com/samchon/nestia/actions?query=workflow%3Abuild)
 [![Guide Documents](https://img.shields.io/badge/guide-documents-forestgreen)](https://nestia.io/docs/)
 
@@ -60,6 +60,8 @@ Check out the document in the [website](https://nestia.io/docs/):
     - [TypedBody](https://nestia.io/docs/core/TypedBody/)
     - [TypedParam](https://nestia.io/docs/core/TypedParam/)
     - [TypedQuery](https://nestia.io/docs/core/TypedRoute/)
+    - [TypedHeaders](https://nestia.io/docs/core/TypedHeaders/)
+    - [TypedException](https://nestia.io/docs/core/TypedException/)
   - Generators
     - [Swagger Documents](https://nestia.io/docs/sdk/swagger/)
     - [SDK Library](https://nestia.io/docs/sdk/sdk/)

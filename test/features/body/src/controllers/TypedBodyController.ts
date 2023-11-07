@@ -1,7 +1,6 @@
-import { Controller, Request } from "@nestjs/common";
-import typia from "typia";
-
 import core from "@nestia/core";
+import { Controller, Request } from "@nestjs/common";
+import typia, { tags } from "typia";
 
 import { IBbsArticle } from "@api/lib/structures/IBbsArticle";
 
@@ -9,11 +8,11 @@ import { IBbsArticle } from "@api/lib/structures/IBbsArticle";
 export class TypedBodyController {
     /**
      * Store an article.
-     * 
+     *
      * @param request Request object from express. Must be disappeared in SDK
      * @param input Content to store
      * @returns Newly archived article
-     * 
+     *
      * @author Samchon
      * @warning This is an fake API
      */
@@ -28,5 +27,14 @@ export class TypedBodyController {
             ...input,
         };
         return output;
+    }
+
+    @core.TypedRoute.Put(":id")
+    public async update(
+        @core.TypedParam("id") id: string & tags.Format<"uuid">,
+        @core.TypedBody() input: IBbsArticle.IUpdate,
+    ): Promise<void> {
+        id;
+        input;
     }
 }

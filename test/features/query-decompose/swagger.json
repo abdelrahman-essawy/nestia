@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -95,7 +95,7 @@
               "type": "string",
               "x-typia-required": false,
               "x-typia-optional": true,
-              "pattern": "^(-?\\d+\\.?\\d*)$"
+              "pattern": "^([+-]?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)$"
             },
             "required": false
           },
@@ -164,10 +164,10 @@
           {
             "name": "id",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -196,10 +196,10 @@
           {
             "name": "atomic",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           },
           {
@@ -304,7 +304,7 @@
             "type": "string",
             "x-typia-required": false,
             "x-typia-optional": true,
-            "pattern": "^(-?\\d+\\.?\\d*)$"
+            "pattern": "^([+-]?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)$"
           },
           "enforce": {
             "x-typia-required": true,
@@ -339,7 +339,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "Omit_lt_IQuery_comma__space__doublequote_atomic_doublequote__gt_": {
+      "OmitIQueryatomic": {
         "type": "object",
         "properties": {
           "limit": {
@@ -368,6 +368,7 @@
           "enforce",
           "values"
         ],
+        "description": "Construct a type with the properties of T except for those in type K.",
         "x-typia-jsDocTags": []
       }
     },

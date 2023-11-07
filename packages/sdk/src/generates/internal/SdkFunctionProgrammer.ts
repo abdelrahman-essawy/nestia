@@ -1,19 +1,24 @@
 import { Pair } from "tstl/utility/Pair";
 
-import { IJsDocTagInfo } from "typia/lib/metadata/IJsDocTagInfo";
+import { IJsDocTagInfo } from "typia/lib/schemas/metadata/IJsDocTagInfo";
 import { Escaper } from "typia/lib/utils/Escaper";
 
 import { INestiaConfig } from "../../INestiaConfig";
 import { IController } from "../../structures/IController";
 import { IRoute } from "../../structures/IRoute";
+import { ImportDictionary } from "../../utils/ImportDictionary";
+import { SdkDtoGenerator } from "./SdkDtoGenerator";
+import { SdkImportWizard } from "./SdkImportWizard";
 import { SdkSimulationProgrammer } from "./SdkSimulationProgrammer";
+import { SdkTypeDefiner } from "./SdkTypeDefiner";
 
 export namespace SdkFunctionProgrammer {
     export const generate =
         (config: INestiaConfig) =>
+        (importer: ImportDictionary) =>
         (route: IRoute): string => {
             const [x, y, z] = [head, body, tail].map((closure) =>
-                closure(config)(route)({
+                closure(config)(importer)(route)({
                     headers: route.parameters.find(
                         (param) =>
                             param.category === "headers" &&
@@ -37,11 +42,19 @@ export namespace SdkFunctionProgrammer {
     --------------------------------------------------------- */
     const body =
         (config: INestiaConfig) =>
+        (importer: ImportDictionary) =>
         (route: IRoute) =>
         (props: {
             query: IRoute.IParameter | undefined;
             input: IRoute.IParameter | undefined;
         }): string => {
+            const encrypted: boolean =
+                route.encrypted === true ||
+                (props.input !== undefined &&
+                    props.input.custom === true &&
+                    props.input.category === "body" &&
+                    props.input.encrypted === true);
+
             // FETCH ARGUMENTS WITH REQUST BODY
             const parameters: IRoute.IParameter[] = filter_path_parameters(
                 route,
@@ -65,11 +78,14 @@ export namespace SdkFunctionProgrammer {
                           "}",
                       ]
                     : "connection",
-                `${route.name}.ENCRYPTED`,
-                `${route.name}.METHOD`,
-                `${route.name}.path(${parameters
-                    .map((p) => p.name)
-                    .join(", ")})`,
+                [
+                    "{",
+                    `    ...${route.name}.METADATA,`,
+                    `    path: ${route.name}.path(${parameters
+                        .map((p) => p.name)
+                        .join(", ")}),`,
+                    "} as const",
+                ],
             ];
             if (props.input !== undefined) {
                 fetchArguments.push(props.input.name);
@@ -90,7 +106,11 @@ export namespace SdkFunctionProgrammer {
                           )
                           .map(
                               (param) =>
-                                  `    typia.assert<typeof ${param.name}>(${param.name});`,
+                                  `    ${SdkImportWizard.typia(
+                                      importer,
+                                  )}.assert<typeof ${param.name}>(${
+                                      param.name
+                                  });`,
                           )
                           .join("\n") + "\n\n"
                     : "";
@@ -112,7 +132,11 @@ export namespace SdkFunctionProgrammer {
                         .join("\n");
                 const fetch = (tab: string) =>
                     [
-                        `${awa ? "await " : ""}Fetcher.fetch(`,
+                        `${awa ? "await " : ""}${SdkImportWizard.Fetcher(
+                            encrypted,
+                        )(importer)}.${
+                            config.propagate === true ? "propagate" : "fetch"
+                        }(`,
                         fetchArguments
                             .map((param) =>
                                 typeof param === "string"
@@ -143,23 +167,28 @@ export namespace SdkFunctionProgrammer {
                 `    // configure header(s)\n`,
                 `    connection.headers ??= {};\n`,
             ];
-
-            for (const header of route.setHeaders) {
-                if (header.type === "assigner")
-                    content.push(
-                        "    ",
-                        `Object.assign(connection.headers, ${access("output")(
-                            header.source,
-                        )});\n`,
-                    );
-                else
-                    content.push(
-                        "    ",
-                        `${access("connection.headers")(
-                            header.target ?? header.source,
-                        )} = ${access("output")(header.source)};\n`,
-                    );
-            }
+            const headerContents = (variable: string) =>
+                route.setHeaders.map((header) =>
+                    header.type === "assigner"
+                        ? `Object.assign(connection.headers, ${access(variable)(
+                              header.source,
+                          )});`
+                        : `${access("connection.headers")(
+                              header.target ?? header.source,
+                          )} = ${access(variable)(header.source)};`,
+                );
+            if (config.propagate === true) {
+                content.push(`    if (output.success) {\n`);
+                content.push(
+                    ...headerContents("output.data").map(
+                        (line) => `        ${line}\n`,
+                    ),
+                );
+                content.push(`    }\n`);
+            } else
+                content.push(
+                    ...headerContents("output").map((line) => `    ${line}\n`),
+                );
             content.push("\n", "    return output;\n", "}");
             return content.join("");
         };
@@ -186,6 +215,7 @@ export namespace SdkFunctionProgrammer {
     --------------------------------------------------------- */
     const head =
         (config: INestiaConfig) =>
+        (importer: ImportDictionary) =>
         (route: IRoute) =>
         (props: {
             query: IRoute.IParameter | undefined;
@@ -198,7 +228,9 @@ export namespace SdkFunctionProgrammer {
             const comments: string[] = route.description
                 ? route.description.split("\n")
                 : [];
-            const tags: IJsDocTagInfo[] = route.tags.filter(
+
+            // COMMENT TAGS
+            const tags: IJsDocTagInfo[] = route.jsDocTags.filter(
                 (tag) =>
                     tag.name !== "param" ||
                     route.parameters
@@ -214,10 +246,27 @@ export namespace SdkFunctionProgrammer {
                 comments.push("", ...new Set(content));
             }
 
-            // COMPLETE THE COMMENT
+            // EXCEPTIONS
+            for (const [key, value] of Object.entries(route.exceptions)) {
+                if (
+                    comments.some(
+                        (str) =>
+                            str.startsWith(`@throw ${key}`) ||
+                            str.startsWith(`@throws ${key}`),
+                    )
+                )
+                    continue;
+                comments.push(
+                    value.description?.length
+                        ? `@throws ${key} ${value.description.split("\n")[0]}`
+                        : `@throws ${key}`,
+                );
+            }
+
+            // POSTFIX
             if (!!comments.length) comments.push("");
             comments.push(
-                `@controller ${route.symbol}`,
+                `@controller ${route.symbol.class}.${route.symbol.function}`,
                 `@path ${route.method} ${route.path}`,
                 `@nestia Generated by Nestia - https://github.com/samchon/nestia`,
             );
@@ -230,8 +279,10 @@ export namespace SdkFunctionProgrammer {
                 route.parameters.some(
                     (p) => p.category === "headers" && p.field === undefined,
                 )
-                    ? `connection: IConnection<${`${route.name}.Headers`}>`
-                    : "connection: IConnection",
+                    ? `connection: ${SdkImportWizard.IConnection(
+                          importer,
+                      )}<${`${route.name}.Headers`}>`
+                    : `connection: ${SdkImportWizard.IConnection(importer)}`,
                 ...route.parameters
                     .filter((p) => p.category !== "headers")
                     .map((param) => {
@@ -241,7 +292,7 @@ export namespace SdkFunctionProgrammer {
                                 ? `${route.name}.${
                                       param === props.query ? "Query" : "Input"
                                   }`
-                                : param.type.name;
+                                : getTypeName(config)(importer)(param);
                         return `${param.name}${
                             param.optional ? "?" : ""
                         }: ${type}`;
@@ -250,7 +301,9 @@ export namespace SdkFunctionProgrammer {
 
             // OUTPUT TYPE
             const output: string =
-                route.output.name === "void" ? "void" : `${route.name}.Output`;
+                config.propagate !== true && route.output.typeName === "void"
+                    ? "void"
+                    : `${route.name}.Output`;
 
             // RETURNS WITH CONSTRUCTION
             return (
@@ -267,6 +320,7 @@ export namespace SdkFunctionProgrammer {
 
     const tail =
         (config: INestiaConfig) =>
+        (importer: ImportDictionary) =>
         (route: IRoute) =>
         (props: {
             query: IRoute.IParameter | undefined;
@@ -276,13 +330,33 @@ export namespace SdkFunctionProgrammer {
             // LIST UP TYPES
             const types: Pair<string, string>[] = [];
             if (props.headers !== undefined)
-                types.push(new Pair("Headers", props.headers.type.name));
+                types.push(
+                    new Pair(
+                        "Headers",
+                        SdkTypeDefiner.headers(config)(importer)(props.headers),
+                    ),
+                );
             if (props.query !== undefined)
-                types.push(new Pair("Query", props.query.type.name));
+                types.push(
+                    new Pair(
+                        "Query",
+                        SdkTypeDefiner.query(config)(importer)(props.query),
+                    ),
+                );
             if (props.input !== undefined)
-                types.push(new Pair("Input", props.input.type.name));
-            if (route.output.name !== "void")
-                types.push(new Pair("Output", route.output.name));
+                types.push(
+                    new Pair(
+                        "Input",
+                        SdkTypeDefiner.input(config)(importer)(props.input),
+                    ),
+                );
+            if (config.propagate === true || route.output.typeName !== "void")
+                types.push(
+                    new Pair(
+                        "Output",
+                        SdkTypeDefiner.output(config)(importer)(route),
+                    ),
+                );
 
             // PATH WITH PARAMETERS
             const parameters: IRoute.IParameter[] = filter_path_parameters(
@@ -293,61 +367,102 @@ export namespace SdkFunctionProgrammer {
                 query: props.query,
                 parameters,
             });
-
             return (
                 `export namespace ${route.name} {\n` +
                 (types.length !== 0
                     ? types
                           .map(
                               (tuple) =>
-                                  `    export type ${tuple.first} = ${
-                                      config.primitive !== false
-                                          ? `Primitive<${tuple.second}>`
-                                          : tuple.second
-                                  };`,
+                                  `    export type ${tuple.first} = ${tuple.second};`,
                           )
                           .join("\n") + "\n"
                     : "") +
                 "\n" +
-                `    export const METHOD = "${route.method}" as const;\n` +
-                `    export const PATH: string = "${route.path}";\n` +
-                `    export const ENCRYPTED: Fetcher.IEncrypted = {\n` +
-                `        request: ${
-                    props.input !== undefined &&
-                    props.input.custom === true &&
-                    props.input.category === "body" &&
-                    props.input.encrypted
-                },\n` +
-                `        response: ${route.encrypted},\n` +
-                (route.status !== undefined
-                    ? `        status: ${route.status},\n`
-                    : "") +
-                `    };\n` +
-                "\n" +
+                [
+                    "export const METADATA = {",
+                    `    method: "${route.method}",`,
+                    `    path: "${route.path}",`,
+                    ...(props.input
+                        ? [
+                              `request: {`,
+                              `    type: "${
+                                  (props.input as IController.IBodyParameter)
+                                      .encrypted
+                                      ? "text/plain"
+                                      : (
+                                            props.input as IController.IBodyParameter
+                                        ).contentType ?? "application/json"
+                              }",`,
+                              `    encrypted: ${
+                                  props.input.custom &&
+                                  props.input.category === "body" &&
+                                  props.input.encrypted
+                              }`,
+                              `},`,
+                          ].map((str) => `    ${str}`)
+                        : ["    request: null,"]),
+                    ...(route.method !== "HEAD"
+                        ? [
+                              `response: {`,
+                              `    type: "${route.output.contentType}",`,
+                              `    encrypted: ${route.encrypted},`,
+                              `},`,
+                          ].map((str) => `    ${str}`)
+                        : ["    response: null,"]),
+                    ...(route.status
+                        ? [`    status: ${route.status},`]
+                        : ["    status: null,"]),
+                    ...(route.output.contentType ===
+                    "application/x-www-form-urlencoded"
+                        ? [
+                              `    parseQuery: (input: URLSearchParams) => ${SdkImportWizard.typia(
+                                  importer,
+                              )}.http.assertQuery<${
+                                  route.output.typeName
+                              }>(input),`,
+                          ]
+                        : []),
+                    "} as const;",
+                ]
+                    .map((line) => `    ${line}`)
+                    .join("\n") +
+                "\n\n" +
                 `    export const path = (${parameters
                     .map(
                         (param) =>
                             `${param.name}: ${
                                 param.category === "query" &&
-                                param.type.name === props.query?.type.name
+                                param.typeName === props.query?.typeName
                                     ? `${route.name}.Query`
-                                    : param.type.name
+                                    : getTypeName(config)(importer)(param)
                             }`,
                     )
                     .join(", ")}): string => {\n` +
                 `${path};\n` +
                 `    }\n` +
-                (config.simulate === true && route.output.name !== "void"
-                    ? `    export const random = (g?: Partial<typia.IRandomGenerator>): Output =>\n` +
-                      `        typia.random<Output>(g);\n`
+                (config.simulate === true && route.output.typeName !== "void"
+                    ? `    export const random = (g?: Partial<${SdkImportWizard.typia(
+                          importer,
+                      )}.IRandomGenerator>): ${SdkTypeDefiner.responseBody(
+                          config,
+                      )(importer)(route)} =>\n` +
+                      `        ${SdkImportWizard.typia(
+                          importer,
+                      )}.random<${SdkTypeDefiner.responseBody(config)(importer)(
+                          route,
+                      )}>(g);\n`
                     : "") +
                 (config.simulate === true
-                    ? SdkSimulationProgrammer.generate(route) + "\n"
+                    ? SdkSimulationProgrammer.generate(config)(importer)(
+                          route,
+                      ) + "\n"
                     : "") +
                 (config.json === true &&
                 route.parameters.find((param) => param.category === "body") !==
                     undefined
-                    ? `    export const stringify = (input: Input) => typia.assertStringify(input);\n`
+                    ? `    export const stringify = (input: Input) => ${SdkImportWizard.typia(
+                          importer,
+                      )}.json.assertStringify(input);\n`
                     : "") +
                 "}"
             );
@@ -429,3 +544,10 @@ export namespace SdkFunctionProgrammer {
 }
 
 const space = (count: number) => " ".repeat(count);
+const getTypeName =
+    (config: INestiaConfig) =>
+    (importer: ImportDictionary) =>
+    (p: IRoute.IParameter | IRoute.IOutput) =>
+        p.metadata
+            ? SdkDtoGenerator.decode(config)(importer)(p.metadata)
+            : p.typeName;

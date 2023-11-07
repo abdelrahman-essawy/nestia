@@ -1,20 +1,15 @@
-import typia, { Primitive } from "typia";
+import type { Resolved } from "@nestia/fetcher";
+import typia from "typia";
+import type { Format } from "typia/lib/tags/Format";
 
-import api from "./../../../../api";
+import api from "../../../../api";
 
 export const test_api_bbs_$package_articles_$$delete = async (
     connection: api.IConnection
 ): Promise<void> => {
     await api.functional.bbs.$package.articles.$$delete(
         connection,
-        typia.random<Primitive<string>>(),
-        uuid(),
+        typia.random<Resolved<string>>(),
+        typia.random<Resolved<string & Format<"uuid">>>(),
     );
 };
-
-const uuid = (): string =>
-    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-        const r = (Math.random() * 16) | 0;
-        const v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-    });

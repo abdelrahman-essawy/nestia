@@ -1,7 +1,8 @@
 import ts from "typescript";
 
+import { Metadata } from "typia/lib/schemas/metadata/Metadata";
+
 import { IController } from "./IController";
-import { ITypeTuple } from "./ITypeTuple";
 
 export interface IRoute {
     name: string;
@@ -16,22 +17,37 @@ export interface IRoute {
     output: IRoute.IOutput;
 
     location: string;
-    symbol: string;
+    symbol: {
+        class: string;
+        function: string;
+    };
     description?: string;
-    tags: ts.JSDocTagInfo[];
+    operationId?: string;
+    jsDocTags: ts.JSDocTagInfo[];
     setHeaders: Array<
         | { type: "setter"; source: string; target?: string }
         | { type: "assigner"; source: string }
     >;
     security: Record<string, string[]>[];
+    exceptions: Record<number | "2XX" | "3XX" | "4XX" | "5XX", IRoute.IOutput>;
+    swaggerTags: string[];
 }
 
 export namespace IRoute {
     export type IParameter = IController.IParameter & {
         optional: boolean;
-        type: ITypeTuple;
+        type: ts.Type;
+        typeName: string;
+        metadata?: Metadata;
     };
-    export interface IOutput extends ITypeTuple {
-        contentType: "application/json" | "text/plain";
+    export interface IOutput {
+        type: ts.Type;
+        typeName: string;
+        metadata?: Metadata;
+        description?: string;
+        contentType:
+            | "application/x-www-form-urlencoded"
+            | "application/json"
+            | "text/plain";
     }
 }

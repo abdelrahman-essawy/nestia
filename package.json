@@ -6,6 +6,9 @@
   "main": "prettier.config.js",
   "scripts": {
     "build": "node build/index.js",
+    "package:latest": "node deploy latest",
+    "package:next": "node deploy next",
+    "package:tgz": "node deploy tgz",
     "test": "cd test && npm run start"
   },
   "repository": {
@@ -20,6 +23,8 @@
   "homepage": "https://github.com/samchon/nestia#readme",
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
-    "prettier": "^2.8.8"
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.1",
+    "sloc": "^0.3.0"
   }
 }

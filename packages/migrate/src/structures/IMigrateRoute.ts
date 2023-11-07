@@ -1,4 +1,4 @@
-import { IJsDocTagInfo } from "typia/lib/metadata/IJsDocTagInfo";
+import { IJsDocTagInfo } from "typia/lib/schemas/metadata/IJsDocTagInfo";
 
 import { ISwaggerSchema } from "./ISwaggeSchema";
 
@@ -10,7 +10,8 @@ export interface IMigrateRoute {
     headers: ISwaggerSchema | null;
     query: ISwaggerSchema | null;
     body: IMigrateRoute.IBody | null;
-    response: IMigrateRoute.IBody | null;
+    success: IMigrateRoute.IBody | null;
+    exceptions: Record<string, IMigrateRoute.IException>;
     description?: string;
     "x-nestia-jsDocTags"?: IJsDocTagInfo[];
 }
@@ -21,8 +22,15 @@ export namespace IMigrateRoute {
         description?: string;
     }
     export interface IBody {
-        type: "text/plain" | "application/json";
+        type:
+            | "text/plain"
+            | "application/json"
+            | "application/x-www-form-urlencoded";
         schema: ISwaggerSchema;
         "x-nestia-encrypted"?: boolean;
+    }
+    export interface IException {
+        description?: string;
+        schema: ISwaggerSchema;
     }
 }

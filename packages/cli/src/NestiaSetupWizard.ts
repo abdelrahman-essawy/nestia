@@ -18,7 +18,7 @@ export namespace NestiaSetupWizard {
         // INSTALL TYPESCRIPT COMPILERS
         pack.install({ dev: true, modulo: "ts-patch", version: "latest" });
         pack.install({ dev: true, modulo: "ts-node", version: "latest" });
-        pack.install({ dev: true, modulo: "typescript", version: "latest" });
+        pack.install({ dev: true, modulo: "typescript", version: "5.2.2" });
         args.project ??= (() => {
             const runner: string =
                 pack.manager === "npm" ? "npx" : pack.manager;
@@ -28,32 +28,31 @@ export namespace NestiaSetupWizard {
 
         // SETUP TRANSFORMER
         await pack.save((data) => {
-            // COMPOSE POSTINSTALL COMMAND
+            // COMPOSE PREPARE COMMAND
             data.scripts ??= {};
             if (
-                typeof data.scripts.postinstall === "string" &&
-                data.scripts.postinstall.trim().length
+                typeof data.scripts.prepare === "string" &&
+                data.scripts.prepare.trim().length
             ) {
-                if (data.scripts.postinstall.indexOf("ts-patch install") === -1)
-                    data.scripts.postinstall =
-                        "ts-patch install && " + data.scripts.postinstall;
-            } else data.scripts.postinstall = "ts-patch install";
+                if (data.scripts.prepare.indexOf("ts-patch install") === -1)
+                    data.scripts.prepare =
+                        "ts-patch install && " + data.scripts.prepare;
+            } else data.scripts.prepare = "ts-patch install";
 
             // FOR OLDER VERSIONS
-            if (typeof data.scripts.prepare === "string") {
-                data.scripts.prepare = data.scripts.prepare
+            if (typeof data.scripts.postinstall === "string") {
+                data.scripts.postinstall = data.scripts.postinstall
                     .split("&&")
                     .map((str) => str.trim())
                     .filter((str) => str.indexOf("ts-patch install") === -1)
                     .join(" && ");
-                if (data.scripts.prepare.length === 0)
-                    delete data.scripts.prepare;
+                if (data.scripts.postinstall.length === 0)
+                    delete data.scripts.postinstall;
             }
         });
-        CommandExecutor.run(`${pack.manager} run postinstall`);
+        CommandExecutor.run(`${pack.manager} run prepare`);
 
-        // INSTALL AND CONFIGURE TYPIA + NESTIA
-        pack.install({ dev: false, modulo: "typia", version: "latest" });
+        // INSTALL AND CONFIGURE NESTIA
         pack.install({ dev: false, modulo: "@nestia/core", version: "latest" });
         pack.install({ dev: true, modulo: "@nestia/e2e", version: "latest" });
         pack.install({ dev: true, modulo: "@nestia/sdk", version: "latest" });

@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -18,16 +18,18 @@
     "/bbs/articles/{section}": {
       "post": {
         "tags": [
+          "common",
+          "protected",
           "public"
         ],
         "parameters": [
           {
             "name": "section",
             "in": "path",
-            "description": "Section code",
             "schema": {
               "type": "string"
             },
+            "description": "Section code",
             "required": true
           }
         ],
@@ -128,25 +130,40 @@
     "/bbs/articles/{section}/{id}": {
       "put": {
         "deprecated": true,
-        "tags": [],
+        "tags": [
+          "common"
+        ],
         "parameters": [
           {
             "name": "section",
             "in": "path",
-            "description": "Section code",
             "schema": {
               "type": "string"
             },
+            "description": "Section code",
             "required": true
           },
           {
             "name": "id",
             "in": "path",
-            "description": "Target article ID",
             "schema": {
+              "type": "string",
               "format": "uuid",
-              "type": "string"
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
+            "description": "Target article ID",
             "required": true
           }
         ],
@@ -253,16 +270,6 @@
         "type": "object",
         "properties": {
           "title": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 3
-              },
-              {
-                "kind": "maxLength",
-                "value": 50
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -286,8 +293,26 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
+            "maxLength": 50,
             "minLength": 3,
-            "maxLength": 50
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<3>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 3,
+                "validate": "3 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<50>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 50,
+                "validate": "$input.length <= 50",
+                "exclusive": true
+              }
+            ]
           },
           "body": {
             "x-typia-required": true,
@@ -315,12 +340,6 @@
         "type": "object",
         "properties": {
           "name": {
-            "x-typia-metaTags": [
-              {
-                "kind": "maxLength",
-                "value": 255
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLengt",
@@ -345,19 +364,19 @@
             "x-typia-optional": false,
             "type": "string",
             "maxLength": 255,
+            "x-typia-typeTags": [
+              {
+                "name": "MaxLength<255>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 255,
+                "validate": "$input.length <= 255",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           },
           "extension": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 1
-              },
-              {
-                "kind": "maxLength",
-                "value": 8
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -381,17 +400,29 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "minLength": 1,
             "maxLength": 8,
+            "minLength": 1,
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<1>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 1,
+                "validate": "1 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<8>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 8,
+                "validate": "$input.length <= 8",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           },
           "url": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "url"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -406,7 +437,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "url"
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"url\">",
+                "target": "string",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": true
+              }
+            ]
           }
         },
         "nullable": false,
@@ -421,12 +462,6 @@
         "type": "object",
         "properties": {
           "id": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "uuid"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -441,7 +476,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"uuid\">",
+                "target": "string",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": true
+              }
+            ]
           },
           "section": {
             "x-typia-required": true,
@@ -449,12 +494,6 @@
             "type": "string"
           },
           "created_at": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -469,19 +508,19 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"date-time\">",
+                "target": "string",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": true
+              }
+            ]
           },
           "title": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 3
-              },
-              {
-                "kind": "maxLength",
-                "value": 50
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -505,8 +544,26 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
+            "maxLength": 50,
             "minLength": 3,
-            "maxLength": 50
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<3>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 3,
+                "validate": "3 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<50>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 50,
+                "validate": "$input.length <= 50",
+                "exclusive": true
+              }
+            ]
           },
           "body": {
             "x-typia-required": true,

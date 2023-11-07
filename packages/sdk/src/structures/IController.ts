@@ -1,11 +1,18 @@
-import { ParamCategory } from "./ParamCategory";
+import type { VERSION_NEUTRAL, VersionValue } from "@nestjs/common/interfaces";
+
+import type { ParamCategory } from "./ParamCategory";
 
 export interface IController {
     file: string;
     name: string;
+    prefixes: string[];
     paths: string[];
+    versions:
+        | Array<Exclude<VersionValue, Array<string | typeof VERSION_NEUTRAL>>>
+        | undefined;
     functions: IController.IFunction[];
     security: Record<string, string[]>[];
+    swaggerTgas: string[];
 }
 
 export namespace IController {
@@ -13,12 +20,22 @@ export namespace IController {
         name: string;
         method: string;
         paths: string[];
+        versions:
+            | Array<
+                  Exclude<VersionValue, Array<string | typeof VERSION_NEUTRAL>>
+              >
+            | undefined;
         encrypted: boolean;
         parameters: IParameter[];
         status?: number;
         type?: string;
         contentType: "application/json" | "text/plain";
         security: Record<string, string[]>[];
+        exceptions: Record<
+            number | "2XX" | "3XX" | "4XX" | "5XX",
+            IController.IException
+        >;
+        swaggerTags: string[];
     }
 
     export type IParameter =
@@ -55,7 +72,10 @@ export namespace IController {
         name: string;
         field: string | undefined;
         encrypted: boolean;
-        contentType: "application/json" | "text/plain";
+        contentType:
+            | "application/json"
+            | "application/x-www-form-urlencoded"
+            | "text/plain";
     }
     export interface IPathParameter {
         custom: true;
@@ -63,9 +83,11 @@ export namespace IController {
         index: number;
         name: string;
         field: string | undefined;
-        meta?: {
-            type: string;
-            nullable: boolean;
-        };
+    }
+
+    export interface IException {
+        type: string;
+        status: number | "2XX" | "3XX" | "4XX" | "5XX";
+        description: string | undefined;
     }
 }

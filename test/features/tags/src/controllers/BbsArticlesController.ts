@@ -1,10 +1,11 @@
-import { Controller } from "@nestjs/common";
-import typia from "typia";
-
 import { TypedBody, TypedParam, TypedRoute } from "@nestia/core";
+import { Controller } from "@nestjs/common";
+import { ApiTags } from "@nestjs/swagger";
+import typia, { tags } from "typia";
 
 import { IBbsArticle } from "@api/lib/structures/IBbsArticle";
 
+@ApiTags("common")
 @Controller("bbs/articles/:section")
 export class BbsArticlesController {
     /**
@@ -16,6 +17,7 @@ export class BbsArticlesController {
      * @param input Content to store
      * @returns Newly archived article
      */
+    @ApiTags("protected")
     @TypedRoute.Post()
     public async store(
         @TypedParam("section") section: string,
@@ -45,7 +47,7 @@ export class BbsArticlesController {
     @TypedRoute.Put(":id")
     public async update(
         @TypedParam("section") section: string,
-        @TypedParam("id", "uuid") id: string,
+        @TypedParam("id") id: string & tags.Format<"uuid">,
         @TypedBody() input: IBbsArticle.IStore,
     ): Promise<IBbsArticle> {
         return {
@@ -64,7 +66,7 @@ export class BbsArticlesController {
     @TypedRoute.Delete(":id")
     public erase(
         @TypedParam("section") section: string,
-        @TypedParam("id", "uuid") id: string,
+        @TypedParam("id") id: string & tags.Format<"uuid">,
     ): void {
         section;
         id;

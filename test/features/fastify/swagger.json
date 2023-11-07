@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -22,19 +22,19 @@
           {
             "name": "section",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           },
           {
             "name": "query",
             "in": "query",
-            "description": "",
             "schema": {
               "$ref": "#/components/schemas/IPage.IRequest"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -44,7 +44,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IPage_lt_IBbsArticle.ISummary_gt_"
+                  "$ref": "#/components/schemas/IPageIBbsArticle.ISummary"
                 }
               }
             },
@@ -61,10 +61,10 @@
           {
             "name": "section",
             "in": "path",
-            "description": "Section code",
             "schema": {
               "type": "string"
             },
+            "description": "Section code",
             "required": true
           }
         ],
@@ -151,20 +151,33 @@
           {
             "name": "section",
             "in": "path",
-            "description": "Section code",
             "schema": {
               "type": "string"
             },
+            "description": "Section code",
             "required": true
           },
           {
             "name": "id",
             "in": "path",
-            "description": "Target article ID",
             "schema": {
+              "type": "string",
               "format": "uuid",
-              "type": "string"
+              "x-typia-typeTags": [
+                {
+                  "target": "string",
+                  "name": "Format<\"uuid\">",
+                  "kind": "format",
+                  "value": "uuid",
+                  "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                  "exclusive": [
+                    "format",
+                    "pattern"
+                  ]
+                }
+              ]
             },
+            "description": "Target article ID",
             "required": true
           }
         ],
@@ -303,7 +316,6 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "",
           "content": {
             "text/plain": {
               "schema": {
@@ -337,7 +349,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of yours",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of yours",
           "content": {
             "text/plain": {
               "schema": {
@@ -350,7 +362,7 @@
         },
         "responses": {
           "201": {
-            "description": "## Warning\nResponse data have been encrypted.\n\nThe response body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedRoute.P.ost](https://github.com/samchon/@nestia/core#encryptedroute) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of newly joined seller",
+            "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of newly joined seller",
             "content": {
               "text/plain": {
                 "schema": {
@@ -409,7 +421,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nEmail and password",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nEmail and password",
           "content": {
             "text/plain": {
               "schema": {
@@ -422,7 +434,7 @@
         },
         "responses": {
           "201": {
-            "description": "## Warning\nResponse data have been encrypted.\n\nThe response body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedRoute.P.ost](https://github.com/samchon/@nestia/core#encryptedroute) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nInformation of the seller",
+            "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nInformation of the seller",
             "content": {
               "text/plain": {
                 "schema": {
@@ -481,7 +493,7 @@
         "tags": [],
         "parameters": [],
         "requestBody": {
-          "description": "## Warning\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n\n-----------------\n\nOld and new passwords",
+          "description": "## Warning\n\nRequest body must be encrypted.\n\nThe request body data would be encrypted as \"AES-128(256) / CBC mode / PKCS#5 Padding / Base64 Encoding\", through the [EncryptedBody](https://github.com/samchon/@nestia/core#encryptedbody) component.\n\nTherefore, just utilize this swagger editor only for referencing. If you need to call the real API, using [SDK](https://github.com/samchon/nestia#software-development-kit) would be much better.\n----------------\nOld and new passwords",
           "content": {
             "text/plain": {
               "schema": {
@@ -556,10 +568,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "boolean"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -588,10 +600,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "number"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -620,10 +632,10 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -652,11 +664,11 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string",
               "nullable": true
             },
+            "description": "",
             "required": true
           }
         ],
@@ -686,7 +698,6 @@
           {
             "name": "value",
             "in": "path",
-            "description": "",
             "schema": {
               "type": "string",
               "enum": [
@@ -695,6 +706,7 @@
                 "C"
               ]
             },
+            "description": "",
             "required": true
           }
         ],
@@ -728,12 +740,6 @@
         "type": "object",
         "properties": {
           "page": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -748,16 +754,19 @@
             "x-typia-required": false,
             "x-typia-optional": true,
             "type": "integer",
-            "minimum": 0,
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           },
           "limit": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -772,7 +781,16 @@
             "x-typia-required": false,
             "x-typia-optional": true,
             "type": "integer",
-            "minimum": 0,
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           }
         },
@@ -780,7 +798,7 @@
         "description": "Page request data",
         "x-typia-jsDocTags": []
       },
-      "IPage_lt_IBbsArticle.ISummary_gt_": {
+      "IPageIBbsArticle.ISummary": {
         "type": "object",
         "properties": {
           "data": {
@@ -806,12 +824,6 @@
         "type": "object",
         "properties": {
           "id": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "uuid"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -826,7 +838,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"uuid\">",
+                "target": "string",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": true
+              }
+            ]
           },
           "section": {
             "x-typia-required": true,
@@ -839,16 +861,6 @@
             "type": "string"
           },
           "title": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 3
-              },
-              {
-                "kind": "maxLength",
-                "value": 50
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -872,16 +884,28 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
+            "maxLength": 50,
             "minLength": 3,
-            "maxLength": 50
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<3>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 3,
+                "validate": "3 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<50>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 50,
+                "validate": "$input.length <= 50",
+                "exclusive": true
+              }
+            ]
           },
           "created_at": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -896,7 +920,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"date-time\">",
+                "target": "string",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": true
+              }
+            ]
           }
         },
         "nullable": false,
@@ -913,12 +947,6 @@
         "type": "object",
         "properties": {
           "current": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -933,15 +961,18 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
-            "minimum": 0
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ]
           },
           "limit": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -956,15 +987,18 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
-            "minimum": 0
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ]
           },
           "records": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -979,15 +1013,18 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
-            "minimum": 0
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ]
           },
           "pages": {
-            "x-typia-metaTags": [
-              {
-                "kind": "type",
-                "value": "uint"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "type",
@@ -1002,7 +1039,16 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "integer",
-            "minimum": 0
+            "x-typia-typeTags": [
+              {
+                "name": "Type<\"uint32\">",
+                "target": "number",
+                "kind": "type",
+                "value": "uint32",
+                "validate": "Math.floor($input) === $input && 0 <= $input && $input <= 4294967295",
+                "exclusive": true
+              }
+            ]
           }
         },
         "nullable": false,
@@ -1019,16 +1065,6 @@
         "type": "object",
         "properties": {
           "title": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 3
-              },
-              {
-                "kind": "maxLength",
-                "value": 50
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -1052,8 +1088,26 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
+            "maxLength": 50,
             "minLength": 3,
-            "maxLength": 50
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<3>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 3,
+                "validate": "3 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<50>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 50,
+                "validate": "$input.length <= 50",
+                "exclusive": true
+              }
+            ]
           },
           "body": {
             "x-typia-required": true,
@@ -1081,12 +1135,6 @@
         "type": "object",
         "properties": {
           "name": {
-            "x-typia-metaTags": [
-              {
-                "kind": "maxLength",
-                "value": 255
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLengt",
@@ -1111,19 +1159,19 @@
             "x-typia-optional": false,
             "type": "string",
             "maxLength": 255,
+            "x-typia-typeTags": [
+              {
+                "name": "MaxLength<255>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 255,
+                "validate": "$input.length <= 255",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           },
           "extension": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 1
-              },
-              {
-                "kind": "maxLength",
-                "value": 8
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -1147,17 +1195,29 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "minLength": 1,
             "maxLength": 8,
+            "minLength": 1,
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<1>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 1,
+                "validate": "1 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<8>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 8,
+                "validate": "$input.length <= 8",
+                "exclusive": true
+              }
+            ],
             "nullable": true
           },
           "url": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "url"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -1172,7 +1232,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "url"
+            "format": "url",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"url\">",
+                "target": "string",
+                "kind": "format",
+                "value": "url",
+                "validate": "/^[a-zA-Z0-9]+:\\/\\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/.test($input)",
+                "exclusive": true
+              }
+            ]
           }
         },
         "nullable": false,
@@ -1187,12 +1257,6 @@
         "type": "object",
         "properties": {
           "id": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "uuid"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -1207,7 +1271,17 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"uuid\">",
+                "target": "string",
+                "kind": "format",
+                "value": "uuid",
+                "validate": "/^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i.test($input)",
+                "exclusive": true
+              }
+            ]
           },
           "section": {
             "x-typia-required": true,
@@ -1215,12 +1289,6 @@
             "type": "string"
           },
           "created_at": {
-            "x-typia-metaTags": [
-              {
-                "kind": "format",
-                "value": "datetime"
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "format",
@@ -1235,19 +1303,19 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "x-typia-typeTags": [
+              {
+                "name": "Format<\"date-time\">",
+                "target": "string",
+                "kind": "format",
+                "value": "date-time",
+                "validate": "!isNaN(new Date($input).getTime())",
+                "exclusive": true
+              }
+            ]
           },
           "title": {
-            "x-typia-metaTags": [
-              {
-                "kind": "minLength",
-                "value": 3
-              },
-              {
-                "kind": "maxLength",
-                "value": 50
-              }
-            ],
             "x-typia-jsDocTags": [
               {
                 "name": "minLength",
@@ -1271,8 +1339,26 @@
             "x-typia-required": true,
             "x-typia-optional": false,
             "type": "string",
+            "maxLength": 50,
             "minLength": 3,
-            "maxLength": 50
+            "x-typia-typeTags": [
+              {
+                "name": "MinLength<3>",
+                "target": "string",
+                "kind": "minLength",
+                "value": 3,
+                "validate": "3 <= $input.length",
+                "exclusive": true
+              },
+              {
+                "name": "MaxLength<50>",
+                "target": "string",
+                "kind": "maxLength",
+                "value": 50,
+                "validate": "$input.length <= 50",
+                "exclusive": true
+              }
+            ]
           },
           "body": {
             "x-typia-required": true,
@@ -1303,13 +1389,13 @@
         "type": "object",
         "properties": {
           "cpu": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.CpuUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.CpuUsage"
           },
           "memory": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.MemoryUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.MemoryUsage"
           },
           "resource": {
-            "$ref": "#/components/schemas/_singlequote_process_singlequote_.global.NodeJS.ResourceUsage"
+            "$ref": "#/components/schemas/process.global.NodeJS.ResourceUsage"
           }
         },
         "nullable": false,
@@ -1331,7 +1417,7 @@
           }
         ]
       },
-      "_singlequote_process_singlequote_.global.NodeJS.CpuUsage": {
+      "process.global.NodeJS.CpuUsage": {
         "type": "object",
         "properties": {
           "user": {
@@ -1352,7 +1438,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.MemoryUsage": {
+      "process.global.NodeJS.MemoryUsage": {
         "type": "object",
         "properties": {
           "rss": {
@@ -1391,7 +1477,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "_singlequote_process_singlequote_.global.NodeJS.ResourceUsage": {
+      "process.global.NodeJS.ResourceUsage": {
         "type": "object",
         "properties": {
           "fsRead": {

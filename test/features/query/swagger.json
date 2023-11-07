@@ -7,7 +7,7 @@
     }
   ],
   "info": {
-    "version": "0.0.0",
+    "version": "0.0.0-dev.20991231",
     "title": "@nestia/test",
     "description": "Test program of Nestia",
     "license": {
@@ -22,10 +22,10 @@
           {
             "name": "query",
             "in": "query",
-            "description": "",
             "schema": {
               "$ref": "#/components/schemas/IQuery"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -54,10 +54,10 @@
           {
             "name": "query",
             "in": "query",
-            "description": "",
             "schema": {
               "$ref": "#/components/schemas/INestQuery"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -86,10 +86,10 @@
           {
             "name": "id",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -118,19 +118,19 @@
           {
             "name": "atomic",
             "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             },
+            "description": "",
             "required": true
           },
           {
             "name": "query",
             "in": "query",
-            "description": "",
             "schema": {
-              "$ref": "#/components/schemas/Omit_lt_IQuery_comma__space__doublequote_atomic_doublequote__gt_"
+              "$ref": "#/components/schemas/OmitIQueryatomic"
             },
+            "description": "",
             "required": true
           }
         ],
@@ -150,6 +150,39 @@
         "x-nestia-namespace": "query.composite.composite",
         "x-nestia-jsDocTags": [],
         "x-nestia-method": "GET"
+      }
+    },
+    "/query/body": {
+      "post": {
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/IQuery"
+              }
+            }
+          },
+          "required": true,
+          "x-nestia-encrypted": false
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/IQuery"
+                }
+              }
+            },
+            "x-nestia-encrypted": false
+          }
+        },
+        "x-nestia-namespace": "query.body.body",
+        "x-nestia-jsDocTags": [],
+        "x-nestia-method": "POST"
       }
     }
   },
@@ -199,7 +232,7 @@
             "type": "string",
             "x-typia-required": false,
             "x-typia-optional": true,
-            "pattern": "^(-?\\d+\\.?\\d*)$"
+            "pattern": "^([+-]?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)$"
           },
           "enforce": {
             "x-typia-required": true,
@@ -234,7 +267,7 @@
         ],
         "x-typia-jsDocTags": []
       },
-      "Omit_lt_IQuery_comma__space__doublequote_atomic_doublequote__gt_": {
+      "OmitIQueryatomic": {
         "type": "object",
         "properties": {
           "limit": {
@@ -262,6 +295,7 @@
         "required": [
           "enforce"
         ],
+        "description": "Construct a type with the properties of T except for those in type K.",
         "x-typia-jsDocTags": []
       }
     },
